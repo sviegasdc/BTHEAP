@@ -4,18 +4,16 @@ import java.util.Comparator;
 public class Heap {
     //Min-heap: as chaves dos filhos são maiores ou iguais às chaves dos pais
 
-    ArrayList<Object> heapArray;
-    Comparator<Object> comparaChaves = new Comparator<Object>() {
+    ArrayList<No> heapArray;
+    Comparator<Integer> comparaChaves = new Comparator<Integer>() {
         @Override
-        public int compare(Object chave1, Object chave2) {
-            int intchave1 = (int) chave1;
-            int intchave2 = (int) chave2;
+        public int compare(Integer chave1, Integer chave2) {
             // se a primeira chave é menor que a segunda, o método retorna um número negativo,"-1"
-            if (intchave1 < intchave2) {
+            if (chave1 < chave2) {
                 return -1;
             }
             // se a primeira chave é maior que a segunda, o método retorna um número positivo,"1"
-            if (intchave1 > intchave2) {
+            if (chave1 > chave2) {
                 return 1;
             }
             // se a primeira chave é igual à segunda, o método retorna "0"
@@ -30,39 +28,73 @@ public class Heap {
         this.heapArray = new ArrayList<>();
     }
 
-    public void addChave(Object chave, Object elemento) {
-        heapArray.add(chave);
-        heapArray.add(elemento);
-        // encontra o nó de inserção
-        int indexNovoNo = heapArray.size() - 2;
-        // para restaurar a propriedade heap-order
-        upHeap(indexNovoNo);
+    public void addChave(int chave, Object elemento) {
+        heapArray.add(new No(chave, elemento));
+        upHeap(heapArray.size() - 1);
+
     }
 
-    public void upHeap(int indexNovoNo) {
-        // enquanto o nó de inserção não for a raiz e sua chave for menor que a chave de seu pai
-        while (indexNovoNo > 0 && comparaChaves.compare(heapArray.get(indexNovoNo), heapArray.get((indexNovoNo - 1) / 2)) < 0) {
-            // troca as posições dos elementos no ArrayList
-            Object temp = heapArray.get(indexNovoNo);
-            heapArray.set(indexNovoNo, heapArray.get((indexNovoNo - 1) / 2));
-            heapArray.set((indexNovoNo - 1) / 2, temp);
-            // atualiza o nó de inserção
-            indexNovoNo = (indexNovoNo - 1) / 2;
+    public void upHeap(int index ) {
+        int pai = (index - 1) / 2;
+        if (index > 0 && comparaChaves.compare(heapArray.get(index).chave, heapArray.get(pai).chave) < 0){
+            // se o index é maior que o pai é trocado o nó passado com o pai
+            No temp = heapArray.get(index);
+            heapArray.set(index,heapArray.get(pai));
+            heapArray.set(pai, temp);
+            // faz a mesma coisa para que o pai fique no local correto e continuar a ordem da heap
+            upHeap(pai);
         }
 
     }
 
     public Object removeMin() throws InvalidKeyException {
         // checando se a heap ta vazia
-        if (heapArray.size() == 0) {
+        if (isEmpty()) {
             throw new InvalidKeyException("Não é possível excluir essa chave pois a heap se encontra vazia");
         }
-        return null;
+        Object raiz = heapArray.get(0);
+        // pegando o nó inicial é guardando ele na variável de raiz (só para fazer o return)
+        // sempre é a raiz que vai ser removida
+        heapArray.set(0, heapArray.get(heapArray.size()-1));
+        // pegando o último nó e setando ele como raiz para depois fazer a ordenação
+        heapArray.remove(heapArray.size() -1);
+        // e agora remove esse elemento já que ele foi colocado no lugar do primiero
+        downHeap(0);
+        // checar o "raiz" para continuar com a ordem da heap
+        return raiz;
+        // retornando o raiz que foi removido
+    }
+
+    public void downHeap(int index){
+        int filhoEsquerdo = 2 * index + 1;
+        int filhoDireito = 2 * index + 2;
+        // pegar os filhos desse index passado (contas loucas)
+        int menor = index;
+        // define que o menor index é esse passado no parâmetro (mesmo que não seja, é só para inicializar msm)
+        if (filhoEsquerdo < heapArray.size() && comparaChaves.compare(heapArray.get(filhoEsquerdo).chave,
+                (heapArray.get(menor).chave)) < 0){
+            // verifica se o filho esuqerdo existe "(índex < heapArray.size())"
+            // e compara a chave do filho esquerdo com o nó atual, se ele for menor entao:
+            menor = filhoEsquerdo;
+        }
+        if(filhoDireito < heapArray.size() && comparaChaves.compare(heapArray.get(filhoDireito).chave,
+                (heapArray.get(menor).chave)) < 0){
+            // agora a mesma coisa, contudo com o filho direito
+            menor = filhoDireito ;
+        }
+        if(menor != index){
+            No temp = heapArray.get(index);
+            heapArray.set(index, heapArray.get(menor));
+            heapArray.set(menor, temp);
+            // continuar com a ordem da heap
+            downHeap(menor);
+        }
+
     }
 
     public Object min() throws InvalidKeyException {
         // checando se a heap ta vazia
-        if (heapArray.size() == 0) {
+        if (isEmpty()) {
             throw new InvalidKeyException("Não é retornar essa chave pois a heap se encontra vazia");
         }
         return heapArray.get(0);
@@ -76,9 +108,23 @@ public class Heap {
         return heapArray.size();
     }
 
-    public void printHeap() {
-        for (int i = 0; i < heapArray.size(); i += 2) {
-            System.out.println("Chave: " + heapArray.get(i) + ", Elemento: " + heapArray.get(i + 1));
+    public void imprimirHeap() {
+        for (int i = 0; i < heapArray.size(); i++) {
+            int pai = (i - 1) / 2;
+            int esquerdo = 2 * i + 1;
+            int direito = 2 * i + 2;
+            System.out.print("Nó " + i + ": ");
+            System.out.print("chave= " + heapArray.get(i).chave + " elemento= " + heapArray.get(i).elemento + " | ");
+            if (pai >= 0) {
+                System.out.print("Pai = " + heapArray.get(pai).chave + " | ");
+            }
+            if (esquerdo < heapArray.size()) {
+                System.out.print("Esquerdo = " + heapArray.get(esquerdo).chave + " | ");
+            }
+            if (direito < heapArray.size()) {
+                System.out.print("Direito = " + heapArray.get(direito).chave);
+            }
+            System.out.println();
         }
     }
 }
