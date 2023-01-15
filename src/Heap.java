@@ -110,23 +110,10 @@ public class Heap {
 
     public void imprimirHeap() {
         for (int i = 0; i < heapArray.size(); i++) {
-            int pai = (i - 1) / 2;
-            int esquerdo = 2 * i + 1;
-            int direito = 2 * i + 2;
-            System.out.print("Nó " + i + ": ");
-            System.out.print("chave= " + heapArray.get(i).chave + " elemento= " + heapArray.get(i).elemento + " | ");
-            if (pai >= 0) {
-                System.out.print("Pai = " + heapArray.get(pai).chave + " | ");
-            }
-            if (esquerdo < heapArray.size()) {
-                System.out.print("Esquerdo = " + heapArray.get(esquerdo).chave + " | ");
-            }
-            if (direito < heapArray.size()) {
-                System.out.print("Direito = " + heapArray.get(direito).chave);
-            }
-            System.out.println();
+            System.out.println("Nó " + i + ": chave= " + heapArray.get(i).chave + " elemento= " + heapArray.get(i).elemento);
+
         }
     }
-}
+    }
 
 
